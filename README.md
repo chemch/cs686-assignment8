@@ -21,16 +21,83 @@
 
     - export ssh_public_key="$(cat ~/.ssh/id_rsa.pub)"
 
-2. 1. If you don't have a Public Key you will need to generate one. Ask ChatGPT how to do that...
+2. 1. If you don't have a Public Key you will need to generate one. 
 
 3. Switch into the Packer Directory an Run the Packer Build and provide your SSH Public Key as a Parameter
 
     - packer build -var="ssh_public_key=$(cat ~/.ssh/id_rsa.pub)" .
 
+4. Confirm the process worked. You should see packer build the AMI:
+
+![alt text](image-2.png)
+
+Record the new AMI that was created as you will need it later:
+
+==> Builds finished. The artifacts of successful builds are:
+--> amazon-ebs.chemch_assign8: AMIs were created:
+us-east-1: ami-0a205789394892c73
+
+
 ## Part 2 - Deploy Resources using Terraform
 
+1. Change directories into the terraform folder
 
+2. Initialize terraform
 
+  - terraform init
+
+3. Run terroform plan to make sure it shows the right resources will get created.
+
+  - terraform plan -var="my_ip=[YOUR_LOCAL_MACHINE_PUBLIC_IP]/32" -var="bastion_ami=ami-0c2b8ca1dad447f8a" -var="custom_ami_id=[AMI_CREATED_IN_PART_1]" -var="key_name=[YOUR_EC2_KEY_PAIR]"
+
+4. Now deploy your plan. 
+
+  - terraform apply -var="my_ip=[YOUR_LOCAL_MACHINE_PUBLIC_IP]/32" -var="bastion_ami=ami-0c2b8ca1dad447f8a" -var="custom_ami_id=[AMI_CREATED_IN_PART_1]" -var="key_name=[YOUR_EC2_KEY_PAIR]"
+
+  Accept the prompt by entering 'yes'. 
+
+You should see the resources getting created like this:
+
+![alt text](image-3.png)
+
+5. SSH into your Bastion host using this command:
+
+  - ssh -i ~/.ssh/assign8-key.pem ec2-user@[YOUR_BASTION_PUBLIC_IP]
+
+  Once you SSH in you should see the Amazon Linux Logo like this:
+
+  ![alt text](image-4.png)
+
+6. Now SSH from the Bastion host to one of the Private Hosts:
+
+First you need to copy your Private Key to the Bastion Host like this:
+
+- scp -i ~/.ssh/assign8-key.pem ~/.ssh/assign8-key.pem ec2-user@[YOUR_BASTION_PUBLIC_IP]:~/
+
+Screenshot: 
+
+![alt text](image-5.png)
+
+Now you can SSH to the private hosts from your Bastion host. First get the Private IP of one of your private EC2 Instances.
+
+AWS Instance with Private IP:
+
+![alt text](image-7.png)
+
+Example Command:
+- ssh -i ~/assign8-key.pem ec2-user@[YOUR_PRIVATE_INSTANCE_IP]
+
+Screenshot:
+
+![alt text](image-6.png)
+
+7. Finally, so you don't rack up cost you can destroy your resources. 
+
+- terraform destroy -var="my_ip=[YOUR_LOCAL_MACHINE_PUBLIC_IP]/32" -var="bastion_ami=ami-0c2b8ca1dad447f8a" -var="custom_ami_id=[AMI_CREATED_IN_PART_1]" -var="key_name=[YOUR_EC2_KEY_PAIR]"
+
+Screenshot:
+
+![alt text](image-8.png)
 
 # Example Log Output
 
@@ -103,4 +170,5 @@ terraform apply -var="my_ip=148.64.107.19/32" -var="bastion_ami=ami-0c2b8ca1dad4
 terraform destroy -var="my_ip=148.64.107.19/32" -var="bastion_ami=ami-0c2b8ca1dad447f8a" -var="custom_ami_id=ami-0ab9a84a6e6248c06" -var="key_name=assign8-key"
 
  ssh -i ~/.ssh/assign8-key.pem ec2-user@<bastion_public_ip>
+
 
