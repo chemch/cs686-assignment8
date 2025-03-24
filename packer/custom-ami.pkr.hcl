@@ -7,17 +7,17 @@ packer {
   }
 }
 
-source "amazon-ebs" "custom" {
+source "amazon-ebs" "chemch_assign8" {
   region        = "us-east-1"
   source_ami    = "ami-0c2b8ca1dad447f8a"
   instance_type = "t2.micro"
   ssh_username  = "ec2-user"
-  ami_name      = "custom-amazon-linux-docker-{{timestamp}}"
+  ami_name      = "chemch_assign8-AL-Dock-{{timestamp}}"
 }
 
 build {
   sources = [
-    "source.amazon-ebs.custom"
+    "source.amazon-ebs.chemch_assign8"
   ]
 
   provisioner "shell" {
