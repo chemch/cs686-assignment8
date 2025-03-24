@@ -1,11 +1,6 @@
 # CS 686 - Assignment 8
+
  Packer and Terraform Assignment
-
-# My Journey
-
-- Had to change to .hcl file and init Packer via:
-
-    - packer init .
 
 # How to Build/Run
 
@@ -171,4 +166,8 @@ terraform destroy -var="my_ip=148.64.107.19/32" -var="bastion_ami=ami-0c2b8ca1da
 
  ssh -i ~/.ssh/assign8-key.pem ec2-user@<bastion_public_ip>
 
+# Gotchas
 
+- Had to change to .hcl file and init Packer via:
+
+    - packer init .
